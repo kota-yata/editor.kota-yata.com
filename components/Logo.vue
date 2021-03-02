@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <font-awesome-icon icon="eraser" />
-  </div>
+  <div class="d-flex align-items-center w-100"><img alt="logo" src="svgs/logo.svg"/> Summarizy</div>
 </template>
 
 <style lang="scss" scoped>
 div {
-  color: $black;
-  font-size: 100px;
+  font-family: $generic-fonts;
+  font-size: 30px;
+  color: $purple;
+
+  img {
+    height: 55px;
+    margin-right: 10px;
+  }
 }
 </style>

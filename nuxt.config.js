@@ -1,17 +1,16 @@
 export default {
   // Target: https://go.nuxtjs.dev/config-target
+  mode: 'spa',
   target: 'static',
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'nuxt-temp',
-    htmlAttrs: {
-      lang: 'en',
-    },
+    title: 'Summarizy',
+    htmlAttrs: { lang: 'en', },
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
+      { hid: 'description', name: 'description', content: 'Summarize document' },
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
@@ -43,11 +42,7 @@ export default {
     'nuxt-webfontloader',
     'nuxt-fontawesome',
   ],
-  webfontloader: {
-    google: {
-      families: ['Bebas+Neue'],
-    },
-  },
+  webfontloader: { google: { families: ['Rammetto+One', 'Inter'], }, },
   fontawesome: {
     imports: [
       {
@@ -56,13 +51,11 @@ export default {
       },
     ],
   },
-  styleResources: {
-    scss: ['@/assets/variable.scss'],
-  },
+  styleResources: { scss: ['~/assets/variable.scss'], },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
-}
+};
