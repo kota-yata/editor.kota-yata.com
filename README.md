@@ -1,20 +1,10 @@
-# nuxt-temp
+# Summarizy
+いちいちPDF右に開いてメモ左に開いていちいちフォーカス変えながら論文読み進めるのめんどくさかったのでまとめてできるサイトです。
 
-## Build Setup
+# Usage
+- Import Memoで読み込むかNew Memoで新しく書き始めてください
+  - Import Memoした場合、Export Memoはそのローカルメモの上書きになります
+  - New Memoした場合、Export Memoは新規保存になります
+- Import PDFで読みたい論文を選んでください
 
-```bash
-# install dependencies
-$ yarn install
-
-# serve with hot reload at localhost:3000
-$ yarn dev
-
-# build for production and launch server
-$ yarn build
-$ yarn start
-
-# generate static project
-$ yarn generate
-```
-
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+- 編集中のメモと論文はIndexedDBに保存されてるのでリロードしてもエディタとビューに残ります
