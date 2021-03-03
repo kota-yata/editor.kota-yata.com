@@ -12,9 +12,6 @@
     "lint": "yarn lint:js && yarn lint:style"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.34",
-    "@fortawesome/free-solid-svg-icons": "^5.15.2",
-    "@fortawesome/vue-fontawesome": "^2.0.2",
     "@nuxt/typescript-runtime": "^2.0.1",
     "@nuxtjs/axios": "^5.12.5",
     "bootstrap": "^4.6.0",
@@ -24,7 +21,6 @@
     "core-js": "^3.8.3",
     "hypermd": "^0.3.11",
     "nuxt": "^2.14.12",
-    "nuxt-fontawesome": "^0.4.0",
     "nuxt-webfontloader": "^1.1.0"
   },
   "devDependencies": {

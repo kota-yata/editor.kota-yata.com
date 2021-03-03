@@ -12,7 +12,8 @@ export default {
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: 'Summarize document' },
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [{ rel: 'icon', type: 'image/png', href: '/logo.png' }],
+    script: [{ src: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.min.js', integrity: 'sha384-Rsf8MiIHKf4GYNodK6fZAeoKdbiBXCrgOdMVxIzYmk+gqnrHgC+AyneIM0UI2UFG', crossorigin: 'anonymous' }]
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -40,17 +41,8 @@ export default {
     '@nuxtjs/axios',
     '@nuxtjs/style-resources',
     'nuxt-webfontloader',
-    'nuxt-fontawesome',
   ],
   webfontloader: { google: { families: ['Rammetto+One', 'Inter'], }, },
-  fontawesome: {
-    imports: [
-      {
-        set: '@fortawesome/free-solid-svg-icons',
-        icons: ['fas'],
-      },
-    ],
-  },
   styleResources: { scss: ['~/assets/variable.scss'], },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
