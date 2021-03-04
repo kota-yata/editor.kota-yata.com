@@ -6,7 +6,7 @@
         <div>
           <button class="index-button" @click="createNewMemo">New Memo</button>
           <button class="index-button" @click="importMD">Import Memo</button>
-          <button class="index-button" @click="exportMD">Export Memo</button>
+          <button class="index-button" @click="exportMD">Save Memo</button>
           <button class="index-button" @click="importPDF">Import PDF</button>
         </div>
       </div>
@@ -71,11 +71,6 @@ export default Vue.extend({
       this.dbVersion = db.version;
       const readTransaction = db.transaction(this.storeName, 'readonly');
       const store = readTransaction.objectStore(this.storeName);
-      // MarkdownメモをIndexedDBから取得してエディターに挿入
-      const mdCallback = (mdHandle: any) => {
-        this.editor.setValue(mdHandle);
-      };
-      this.getFileHandleFromDB(store, 'mdText', mdCallback);
       // PDFをIndexedDBから取得して表示
       const pdfCallback = (pdfHandle: any) => {
         this.insertPDF(pdfHandle);
@@ -97,9 +92,13 @@ export default Vue.extend({
         mode: {
           name: 'hypermd',
           hashtag: true,
+          highlightFormatting: true,
         }
       });
       this.editor = editor;
+      const mdText: string | null = localStorage.getItem('mdText');
+      if (!mdText) return;
+      this.editor.setValue(mdText);
     });
   },
   methods: {
@@ -155,16 +154,13 @@ export default Vue.extend({
         const db: any = event.target.result;
         const transaction = db.transaction(this.storeName, 'readwrite');
         const store = transaction.objectStore(this.storeName);
-        const deleteTextReq = store.delete('mdText');
-        deleteTextReq.onsuccess = () => {
-          console.log('MD text deleted');
-        };
         const deleteFileHandleReq = store.delete('mdFileHandle');
         deleteFileHandleReq.onsuccess = () => {
           console.log('MD FileHandle deleted');
           db.close();
         };
       };
+      localStorage.setItem('mdText', '');
       localStorage.setItem('doesMDFileHandleExists', 'false');
     },
     async importPDF() {
@@ -196,7 +192,7 @@ export default Vue.extend({
         const mdFile: any = await fileHandle.getFile();
         const mdText: string = await mdFile.text();
         this.editor.setValue(mdText);
-        this.putDataToDB('mdText', mdText);
+        localStorage.setItem('mdText', mdText);
         this.putDataToDB('mdFileHandle', fileHandle);
         localStorage.setItem('doesMDFileHandleExists', 'true');
       } catch (err) {

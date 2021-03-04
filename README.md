@@ -3,8 +3,9 @@
 
 # Usage
 - Import Memoで読み込むかNew Memoで新しく書き始めてください
-  - Import Memoした場合、Export Memoはそのローカルメモの上書きになります
-  - New Memoした場合、Export Memoは新規保存になります
+  - Import Memoした場合、Save Memoはそのローカルメモの上書きになります
+  - New Memoした場合、Save Memoは新規保存になります
 - Import PDFで読みたい論文を選んでください
 
-- 編集中のメモと論文はIndexedDBに保存されてるのでリロードしてもエディタとビューに残ります
+# メモとPDFのWebStoraget利用方法について
+開いたPDFとメモのFileHandleはIndexedDBに保存されますが、メモの文章自体はlocalstorageに保存されます。これはテキストエリアに文字が打たれる度にindexedDBに書き込むとだいぶ処理が重くなるのと、文字列だけであればlocalStorageの方が読み書きともに短いコードで書けるからです。PDFデータはURLだけlocalStorageに保存していても、ロード時にそのURLには何もデータがない状態なので、IndexedDBにFileHandleごと保存して、ロード時にURLに変換する処理を行います。
