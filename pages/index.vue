@@ -22,23 +22,7 @@
 import Vue from 'vue';
 import * as HyperMD from 'hypermd';
 import { fileOpen, fileSave } from 'browser-fs-access';
-
-interface opts {
-  mimeTypes: string[],
-  extensions?: string[],
-  multiple: boolean,
-  description: string
-}
-
-interface data {
-  iframe: HTMLIFrameElement | null,
-  textarea: HTMLTextAreaElement | null,
-  altTextElement: HTMLElement | null,
-  editor: any,
-  dbVersion: number,
-  dbName: string,
-  storeName: string,
-}
+import { data, opts } from '../types/index';
 
 export default Vue.extend({
   data(): data {
@@ -105,7 +89,7 @@ export default Vue.extend({
     getFileHandleFromDB(store: any, key: string, callback?: (fileHandle: any) => void): any {
       const getRequest = store.get(key);
       getRequest.onsuccess = (event: Event) => {
-        if (!event.target) return;
+        if (!event.target || !event.target.result) return;
         const fileHandle: any = event.target.result.value;
         if (!callback) return;
         callback(fileHandle);
@@ -173,7 +157,7 @@ export default Vue.extend({
         const pdfFile = await fileOpen(opts);
         this.insertPDF(pdfFile);
       } catch (err) {
-        console.log(err);
+        console.log('Failed to import PDF: ', err);
       }
     },
     async importMD() {
