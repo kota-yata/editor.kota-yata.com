@@ -6,7 +6,7 @@
         <div>
           <button class="index-button" @click="createNewMemo">New Memo</button>
           <button class="index-button" @click="importMD">Import Memo</button>
-          <button class="index-button" @click="exportMD">Save Memo</button>
+          <button class="index-button" @click="exportMD">Export Memo</button>
           <button class="index-button" @click="importPDF">Import PDF</button>
         </div>
       </div>
@@ -21,8 +21,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import * as HyperMD from 'hypermd';
-import { fileOpen, fileSave } from 'browser-fs-access';
-import { data, opts } from '../types/index';
+// eslint-disable-next-line import/named
+import { fileOpen, fileSave, FileSystemHandle, FileWithHandle } from 'browser-fs-access';
+import { data, opts } from '../@types/index';
 
 export default Vue.extend({
   data(): data {
@@ -83,6 +84,10 @@ export default Vue.extend({
       const mdText: string | null = localStorage.getItem('mdText');
       if (!mdText) return;
       this.editor.setValue(mdText);
+    });
+    window.addEventListener('beforeunload', () => {
+      const text: string = this.editor.getValue();
+      localStorage.setItem('mdText', text);
     });
   },
   methods: {
@@ -146,6 +151,7 @@ export default Vue.extend({
       };
       localStorage.setItem('mdText', '');
       localStorage.setItem('doesMDFileHandleExists', 'false');
+      console.log('New memo has been created');
     },
     async importPDF() {
       const opts: opts = {
@@ -162,23 +168,29 @@ export default Vue.extend({
     },
     async importMD() {
       const opts = {
-        types: [
-          {
-            description: 'Markdown',
-            accept: { 'text/markdown': ['.md'] },
-          },
-        ],
+        mimeTypes: ['text/markdown'],
+        extensions: ['.md'],
+        description: 'Markdown',
         multiple: false,
       };
       try {
-        let fileHandle: any;
-        [fileHandle] = await window.showOpenFilePicker(opts); // eslint-disable-line prefer-const
-        const mdFile: any = await fileHandle.getFile();
-        const mdText: string = await mdFile.text();
+        let fileHandl: any;
+        [fileHandl] = await window.showOpenFilePicker(opts); // eslint-disable-line prefer-const
+        console.log('fileHandle : ', fileHandl);
+        // const mdFile: any = await fileHandle.getFile();
+        // const mdText: string = await mdFile.text();
+        // this.putDataToDB('mdFileHandle', fileHandle);
+        // localStorage.setItem('doesMDFileHandleExists', 'true');
+        const file: FileWithHandle = await fileOpen(opts) as FileWithHandle;
+        console.log(file);
+        const mdText: string = await file.text();
         this.editor.setValue(mdText);
         localStorage.setItem('mdText', mdText);
-        this.putDataToDB('mdFileHandle', fileHandle);
-        localStorage.setItem('doesMDFileHandleExists', 'true');
+        const fileHandle: FileSystemHandle | undefined = file.handle;
+        if (!fileHandle) {
+          console.log('Cannot get fileHandle from this imported file');
+          return;
+        }
       } catch (err) {
         console.log(err);
       }
@@ -229,8 +241,6 @@ export default Vue.extend({
     &-textarea {
       padding: 10px;
       resize: none;
-      border-radius: 5px;
-      border: 2px $purple solid;
       height: 100%;
       font-size: 15px;
       &:focus {
@@ -241,19 +251,18 @@ export default Vue.extend({
 }
 .index-button {
   vertical-align: middle;
-  background: transparent;
-  border-radius: 5px;
-  border: 2px $purple solid;
+  background: $black;
+  border: 2px $black solid;
   padding: 5px 15px;
   margin-left: 5px;
-  color: $purple;
+  border-radius: 3px;
+  box-shadow: 0 0 10px 0 rgba($color: $black, $alpha: 0.25);
+  color: $completely-white;
   font-family: $generic-fonts-inter;
-  font-weight: bold;
   font-size: 15px;
   transition: 0.2s;
   &:hover {
-    background: $purple;
-    color: $completely-white;
+    opacity: 0.8;
     transition: 0.2s;
   }
 }
@@ -266,8 +275,8 @@ export default Vue.extend({
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-family: $generic-fonts;
-    color: $purple;
+    font-family: $generic-fonts-inter;
+    color: $black;
   }
   iframe {
     width: 100%;
@@ -281,8 +290,8 @@ export default Vue.extend({
   font-family: $generic-fonts-inter;
   padding: 10px;
   resize: none;
-  border-radius: 5px;
-  border: 2px $purple solid;
+  border-radius: 3px;
+  border: 0.5px $gray solid;
   height: 100%;
   font-size: 15px;
 }

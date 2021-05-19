@@ -1,19 +1,18 @@
 export default {
   // Target: https://go.nuxtjs.dev/config-target
-  mode: 'spa',
   ssr: false,
   target: 'static',
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'Summarizy',
+    title: 'Editor | kota-yata.com',
     htmlAttrs: { lang: 'en', },
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: 'Summarize document' },
+      { hid: 'description', name: 'description', content: 'WYSIWIG memo app with PDF preview' },
     ],
-    link: [{ rel: 'icon', type: 'image/png', href: '/logo.png' }],
+    link: [{ rel: 'icon', type: 'image/webp', href: '/sql.webp' }],
     script: [{ src: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.min.js', integrity: 'sha384-Rsf8MiIHKf4GYNodK6fZAeoKdbiBXCrgOdMVxIzYmk+gqnrHgC+AyneIM0UI2UFG', crossorigin: 'anonymous' }]
   },
 
@@ -43,7 +42,7 @@ export default {
     '@nuxtjs/style-resources',
     'nuxt-webfontloader',
   ],
-  webfontloader: { google: { families: ['Rammetto+One', 'Inter'], }, },
+  webfontloader: { google: { families: ['Inter'], }, },
   styleResources: { scss: ['~/assets/variable.scss'], },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
