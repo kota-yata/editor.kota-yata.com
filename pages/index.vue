@@ -6,7 +6,7 @@
         <div>
           <button class="index-button" @click="createNewMemo">New Memo</button>
           <button class="index-button" @click="importMD">Import Memo</button>
-          <button class="index-button" @click="exportMD">Export Memo</button>
+          <button class="index-button" @click="exportMD">Save Memo</button>
           <button class="index-button" @click="importPDF">Import PDF</button>
         </div>
       </div>
@@ -22,7 +22,7 @@
 import Vue from 'vue';
 import * as HyperMD from 'hypermd';
 // eslint-disable-next-line import/named
-import { fileOpen, fileSave, FileSystemHandle, FileWithHandle } from 'browser-fs-access';
+import { fileOpen, fileSave } from 'browser-fs-access';
 import { data, opts } from '../@types/index';
 
 export default Vue.extend({
@@ -89,6 +89,12 @@ export default Vue.extend({
       const text: string = this.editor.getValue();
       localStorage.setItem('mdText', text);
     });
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 's' && event.metaKey) {
+        event.preventDefault();
+        this.exportMD();
+      }
+    });
   },
   methods: {
     getFileHandleFromDB(store: any, key: string, callback?: (fileHandle: any) => void): any {
@@ -132,8 +138,6 @@ export default Vue.extend({
       this.putDataToDB('pdf', pdfFile);
     },
     createNewMemo() {
-      if (!this.editor) return;
-      this.editor.setValue('');
       const openReqForDeletingData: IDBOpenDBRequest = indexedDB.open(this.dbName);
       openReqForDeletingData.onerror = (err) => {
         throw new Error(`Open request against ${this.dbName} is blocked: ${err}`);
@@ -168,29 +172,23 @@ export default Vue.extend({
     },
     async importMD() {
       const opts = {
-        mimeTypes: ['text/markdown'],
-        extensions: ['.md'],
-        description: 'Markdown',
+        types: [
+          {
+            description: 'Markdown',
+            accept: { 'text/markdown': ['.md'] },
+          },
+        ],
         multiple: false,
       };
       try {
-        let fileHandl: any;
-        [fileHandl] = await window.showOpenFilePicker(opts); // eslint-disable-line prefer-const
-        console.log('fileHandle : ', fileHandl);
-        // const mdFile: any = await fileHandle.getFile();
-        // const mdText: string = await mdFile.text();
-        // this.putDataToDB('mdFileHandle', fileHandle);
-        // localStorage.setItem('doesMDFileHandleExists', 'true');
-        const file: FileWithHandle = await fileOpen(opts) as FileWithHandle;
-        console.log(file);
-        const mdText: string = await file.text();
+        let fileHandle: any;
+        [fileHandle] = await window.showOpenFilePicker(opts); // eslint-disable-line prefer-const
+        const mdFile: any = await fileHandle.getFile();
+        const mdText: string = await mdFile.text();
         this.editor.setValue(mdText);
         localStorage.setItem('mdText', mdText);
-        const fileHandle: FileSystemHandle | undefined = file.handle;
-        if (!fileHandle) {
-          console.log('Cannot get fileHandle from this imported file');
-          return;
-        }
+        this.putDataToDB('mdFileHandle', fileHandle);
+        localStorage.setItem('doesMDFileHandleExists', 'true');
       } catch (err) {
         console.log(err);
       }
