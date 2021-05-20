@@ -22,7 +22,7 @@
 import Vue from 'vue';
 import * as HyperMD from 'hypermd';
 // eslint-disable-next-line import/named
-import { fileOpen, fileSave } from 'browser-fs-access';
+import { fileOpen } from 'browser-fs-access';
 import { data, opts } from '../@types/index';
 
 export default Vue.extend({
@@ -138,6 +138,7 @@ export default Vue.extend({
       this.putDataToDB('pdf', pdfFile);
     },
     createNewMemo() {
+      this.editor.setValue('');
       const openReqForDeletingData: IDBOpenDBRequest = indexedDB.open(this.dbName);
       openReqForDeletingData.onerror = (err) => {
         throw new Error(`Open request against ${this.dbName} is blocked: ${err}`);
@@ -194,13 +195,22 @@ export default Vue.extend({
       }
     },
     async exportMD() {
-      const expOpts = { extensions: ['.md'] };
+      const expOpts = {
+        suggestedName: 'memo.md',
+        types: [
+          {
+            description: 'Markdown',
+            accept: { 'text/markdown': ['.md'], },
+          },
+        ],
+      };
       const editorText: string = this.editor.getValue();
-      const blob: Blob = new Blob([editorText], { type: 'text/markdown' });
       const doesMDFileHandleExists: string | null = localStorage.getItem('doesMDFileHandleExists');
       if (doesMDFileHandleExists !== 'true') {
         try {
-          await fileSave(blob, expOpts);
+          const fileHandle = await window.showSaveFilePicker(expOpts);
+          this.putDataToDB('mdFileHandle', fileHandle);
+          localStorage.setItem('doesMDFileHandleExists', 'true');
         } catch (err) {
           console.log(err);
         }
