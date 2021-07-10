@@ -5,11 +5,9 @@ export interface opts {
   description: string
 }
 
-export interface data {
+export interface indexData {
   iframe: HTMLIFrameElement | null,
-  textarea: HTMLTextAreaElement | null,
   altTextElement: HTMLElement | null,
-  editor: any,
   dbVersion: number,
   dbName: string,
   storeName: string,

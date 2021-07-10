@@ -27,7 +27,6 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/node",
-      "@types/window"
     ],
   },
   "exclude": [

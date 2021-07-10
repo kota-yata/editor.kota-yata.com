@@ -3,41 +3,36 @@
     <div class="col-7 row index-left d-flex align-items-center m-0 p-0">
       <div class="col-12 index-left-logo d-flex align-items-center justify-content-between">
         <div><Logo /></div>
-        <div>
-          <button class="index-button" @click="createNewMemo">New Memo</button>
-          <button class="index-button" @click="importMD">Import Memo</button>
-          <button class="index-button" @click="exportMD">Save Memo</button>
-          <button class="index-button" @click="importPDF">Import PDF</button>
-        </div>
+        <ToolButtons @createNewMemo="createNewMemo(true)" @importMD="importMD" @exportMD="exportMD" @importPDF="importPDF" />
       </div>
-      <div class="col-12 index-left-textarea"><textarea ref="textarea" class="w-100 index-left-textarea-textarea" draggable="false"></textarea></div>
+      <div class="col-12 index-left-textarea"><Editor ref="editor" /></div>
     </div>
     <div class="col-5 index-right m-0 p-0">
-      <div class="col-12 h-100"><span ref="alttext" class="index-right-alttext">Your PDF will be shown here</span><iframe ref="viewer" width="100%" height="100%"></iframe></div>
+      <div class="col-12 h-100">
+        <span ref="alttext" class="position-absolute index-right-alttext">Your PDF will be shown here</span>
+        <iframe ref="viewer" width="100%" height="100%"></iframe>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import * as HyperMD from 'hypermd';
 // eslint-disable-next-line import/named
 import { fileOpen } from 'browser-fs-access';
-import { data, opts } from '../@types/index';
+import { indexData, opts } from '../types/index';
 
 export default Vue.extend({
-  data(): data {
+  data(): any {
     return {
       iframe: null,
-      textarea: null,
       altTextElement: null,
-      editor: null,
       dbVersion: 1,
       dbName: '',
       storeName: '',
-    };
+    } as indexData;
   },
-  mounted() {
+  async mounted() {
     this.dbName = 'fileHandleDB';
     this.storeName = 'fileHandleStore';
     const openReq: IDBOpenDBRequest = indexedDB.open(this.dbName, this.dbVersion);
@@ -47,9 +42,7 @@ export default Vue.extend({
       db.createObjectStore(this.storeName, { keyPath: 'type' });
       console.log(`${this.storeName} was successfully created`);
     };
-    openReq.onerror = (err: Event) => {
-      throw new Error(`Open request against ${this.dbName} is blocked: ${err}`);
-    };
+    openReq.onerror = (err: Event) => { throw new Error(`Open request against ${this.dbName} is blocked: ${err}`); };
     openReq.onsuccess = (event) => {
       if (!event.target) return;
       const db = event.target.result;
@@ -64,29 +57,14 @@ export default Vue.extend({
 
       db.close();
     };
-    this.$nextTick(() => {
-      const iframeElement: HTMLIFrameElement | null = this.$refs.viewer as HTMLIFrameElement;
-      this.iframe = iframeElement;
-      const textarea: HTMLTextAreaElement | null = this.$refs.textarea as HTMLTextAreaElement;
-      this.textarea = textarea;
-      const alttext: HTMLElement = this.$refs.alttext as HTMLElement;
-      this.altTextElement = alttext;
-      if (!this.textarea) throw new Error('textarea not found');
-      const editor: any = HyperMD.fromTextArea(this.textarea, {
-        lineNumbers: false,
-        mode: {
-          name: 'hypermd',
-          hashtag: true,
-          highlightFormatting: true,
-        }
-      });
-      this.editor = editor;
-      const mdText: string | null = localStorage.getItem('mdText');
-      if (!mdText) return;
-      this.editor.setValue(mdText);
-    });
+    await this.$nextTick();
+    const iframeElement: HTMLIFrameElement | null = this.$refs.viewer as HTMLIFrameElement;
+    this.iframe = iframeElement;
+    const alttext: HTMLElement = this.$refs.alttext as HTMLElement;
+    this.altTextElement = alttext;
+
     window.addEventListener('beforeunload', () => {
-      const text: string = this.editor.getValue();
+      const text: string = this.$refs.editor.getValue();
       localStorage.setItem('mdText', text);
     });
     window.addEventListener('keydown', (event) => {
@@ -137,8 +115,8 @@ export default Vue.extend({
       this.altTextElement?.remove();
       this.putDataToDB('pdf', pdfFile);
     },
-    createNewMemo() {
-      this.editor.setValue('');
+    createNewMemo(doesClearEditor: boolean = true) {
+      if (doesClearEditor) this.$refs.editor.clear();
       const openReqForDeletingData: IDBOpenDBRequest = indexedDB.open(this.dbName);
       openReqForDeletingData.onerror = (err) => {
         throw new Error(`Open request against ${this.dbName} is blocked: ${err}`);
@@ -156,7 +134,7 @@ export default Vue.extend({
       };
       localStorage.setItem('mdText', '');
       localStorage.setItem('doesMDFileHandleExists', 'false');
-      console.log('New memo has been created');
+      if (doesClearEditor) console.log('New memo has been created');
     },
     async importPDF() {
       const opts: opts = {
@@ -204,11 +182,15 @@ export default Vue.extend({
           },
         ],
       };
-      const editorText: string = this.editor.getValue();
+      const editorText: string = this.$refs.editor.getValue();
       const doesMDFileHandleExists: string | null = localStorage.getItem('doesMDFileHandleExists');
+      // FileHandleが見つからなかった場合はドキュメントをダウンロード
       if (doesMDFileHandleExists !== 'true') {
         try {
           const fileHandle = await window.showSaveFilePicker(expOpts);
+          const writable: any = await fileHandle.createWritable();
+          await writable.write(editorText);
+          await writable.close();
           this.putDataToDB('mdFileHandle', fileHandle);
           localStorage.setItem('doesMDFileHandleExists', 'true');
         } catch (err) {
@@ -216,6 +198,7 @@ export default Vue.extend({
         }
         return;
       }
+      // FileHandleがある場合は上書き
       const exportCallBack = async (mdHandle: any) => {
         const fileHandle = mdHandle;
         const writable: any = await fileHandle.createWritable();
@@ -246,32 +229,6 @@ export default Vue.extend({
   &-textarea {
     margin-left: 10px;
     height: calc(100% - 60px);
-    &-textarea {
-      padding: 10px;
-      resize: none;
-      height: 100%;
-      font-size: 15px;
-      &:focus {
-        outline: none;
-      }
-    }
-  }
-}
-.index-button {
-  vertical-align: middle;
-  background: $black;
-  border: 2px $black solid;
-  padding: 5px 15px;
-  margin-left: 5px;
-  border-radius: 3px;
-  box-shadow: 0 0 10px 0 rgba($color: $black, $alpha: 0.25);
-  color: $completely-white;
-  font-family: $generic-fonts-inter;
-  font-size: 15px;
-  transition: 0.2s;
-  &:hover {
-    opacity: 0.8;
-    transition: 0.2s;
   }
 }
 .index-right {
@@ -279,7 +236,6 @@ export default Vue.extend({
 
   position: relative;
   &-alttext {
-    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -292,19 +248,5 @@ export default Vue.extend({
     height: calc(100% - 10px);
     border: none;
   }
-}
-
-.CodeMirror {
-  font-family: $generic-fonts-inter;
-  padding: 10px;
-  resize: none;
-  border-radius: 3px;
-  border: 0.5px $gray solid;
-  height: 100%;
-  font-size: 15px;
-}
-.CodeMirror-gutters,
-.CodeMirror-foldgutter-open {
-  display: none;
 }
 </style>
