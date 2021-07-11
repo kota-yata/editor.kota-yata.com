@@ -51,4 +51,21 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+  pwa: {
+    meta: {
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+    },
+    manifest: {
+      name: 'kota-yata editor',
+      // eslint-disable-next-line camelcase
+      short_name: 'Editor',
+      description: 'WYSIWYG Markdown editor with pdf viewer',
+      lang: 'en',
+      // eslint-disable-next-line camelcase
+      background_color: '#f5f5f5',
+      // eslint-disable-next-line camelcase
+      theme_color: '#333333',
+    }
+  }
 };
