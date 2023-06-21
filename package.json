@@ -19,7 +19,7 @@
     "codemirror": "^5.59.4",
     "core-js": "^3.8.3",
     "hypermd": "^0.3.11",
-    "nuxt": "^2.14.12",
+    "nuxt": "^3.4.3",
     "nuxt-webfontloader": "^1.1.0"
   },
   "devDependencies": {
